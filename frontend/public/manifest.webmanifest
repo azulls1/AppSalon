@@ -1,7 +1,7 @@
 {
-  "name": "AppSalon Barbería",
-  "short_name": "AppSalon",
-  "description": "Caballeros desde 2024. Corte, barba y afeitado a navaja con tu barbero de confianza.",
+  "name": "Mike's Club Barber Shop",
+  "short_name": "Mike's Club",
+  "description": "Mike's Club Barber Shop en Cuautitlán Centro. Cortes modernos, experiencia premium y relajación al final de tu servicio.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,16 +12,16 @@
   "categories": ["lifestyle", "shopping"],
   "icons": [
     {
-      "src": "/icon-192.svg",
+      "src": "/icons/favicon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icon-512.svg",
+      "src": "/icons/favicon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
