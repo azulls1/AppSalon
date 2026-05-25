@@ -20,7 +20,7 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
       <header class="border-b border-app-oro/15 bg-app-negro/95 backdrop-blur sticky top-0 z-20">
         <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <a routerLink="/" class="flex items-center gap-3">
-            <img src="/images/logo.jpg" alt="Mike's Club Barber Shop"
+            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop"
                  class="brand-logo" />
             <span class="logo font-hero text-2xl">
               <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
@@ -47,7 +47,7 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
         <div #heroBg class="absolute inset-0 bg-cover bg-center opacity-25 will-change-transform"
              style="background-image: url('/salon.jpg'); transform: translateY(0);"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-app-negro via-app-negro/70 to-transparent"></div>
-        <img src="/images/logo.jpg" alt=""
+        <img src="/images/logo-transparent.png" alt=""
              aria-hidden="true"
              class="hero-watermark glow-pulse" />
         <div class="relative max-w-6xl mx-auto px-6 py-24 lg:py-36">
@@ -248,15 +248,16 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
 
     .brand-logo {
       @apply h-14 w-auto object-contain shrink-0;
-      mix-blend-mode: screen;
     }
     .brand-logo-sm { @apply h-10; }
 
     .hero-watermark {
       @apply absolute pointer-events-none select-none
-             right-[-3rem] sm:right-2 lg:right-12 top-1/2 -translate-y-1/2
-             w-80 sm:w-[26rem] lg:w-[32rem] opacity-20
-             mix-blend-screen drop-shadow-2xl;
+             right-2 sm:right-6 lg:right-20 top-[65%] -translate-y-1/2
+             h-[14rem] sm:h-[18rem] lg:h-[22rem] w-auto
+             max-h-[80%] opacity-25
+             object-contain;
+      filter: drop-shadow(0 0 24px rgba(199, 162, 75, 0.25));
     }
 
     .btn-primary {

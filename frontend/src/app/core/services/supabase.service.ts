@@ -19,6 +19,10 @@ export class SupabaseService {
   readonly client: SupabaseClient;
   readonly session = signal<Session | null>(null);
 
+  /** Resuelve cuando la sesión inicial se ha leído de storage. Útil para
+   *  los guards: evita race conditions al refrescar rutas privadas. */
+  readonly ready: Promise<void>;
+
   constructor() {
     this.client = createClient(
       resolveSupabaseUrl(environment.supabaseUrl),
@@ -26,7 +30,10 @@ export class SupabaseService {
       { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } },
     );
 
-    this.client.auth.getSession().then(({ data }) => this.session.set(data.session));
+    this.ready = this.client.auth.getSession().then(({ data }) => {
+      this.session.set(data.session);
+    });
+
     this.client.auth.onAuthStateChange((_event, session) => this.session.set(session));
   }
 }

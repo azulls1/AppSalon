@@ -1,8 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AlertaComponent } from '../../shared/alerta.component';
+
+function safeReturnUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (!url.startsWith('/') || url.startsWith('//')) return null;
+  return url;
+}
 
 @Component({
   selector: 'app-registro',
@@ -42,7 +48,7 @@ import { AlertaComponent } from '../../shared/alerta.component';
     </form>
 
     <div class="mt-8 text-sm text-center">
-      <a routerLink="/login" class="text-app-azul hover:underline">¿Ya tienes cuenta? Inicia sesión</a>
+      <a routerLink="/login" [queryParams]="returnUrlParams()" class="text-app-azul hover:underline">¿Ya tienes cuenta? Inicia sesión</a>
     </div>
   `,
   styles: [`
@@ -62,17 +68,23 @@ import { AlertaComponent } from '../../shared/alerta.component';
 export class RegistroComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   form = { nombre: '', apellido: '', telefono: '', email: '', password: '' };
   loading = signal(false);
   error = signal<string | null>(null);
+
+  returnUrlParams(): Record<string, string> {
+    const r = safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+    return r ? { returnUrl: r } : {};
+  }
 
   async onSubmit() {
     this.loading.set(true);
     this.error.set(null);
     try {
       await this.auth.signUp(this.form);
-      this.router.navigateByUrl('/mensaje');
+      this.router.navigate(['/mensaje'], { queryParams: this.returnUrlParams() });
     } catch (e: any) {
       this.error.set(e?.message ?? 'Error al crear la cuenta');
       this.loading.set(false);

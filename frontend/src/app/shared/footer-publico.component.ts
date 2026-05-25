@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
       <div class="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
         <div>
           <div class="flex items-center gap-3 mb-3">
-            <img src="/images/logo.jpg" alt="Mike's Club Barber Shop" class="footer-logo" />
+            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop" class="footer-logo" />
             <span class="logo font-hero text-xl">
               <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
             </span>
@@ -71,7 +71,6 @@ import { Component } from '@angular/core';
 
     .footer-logo {
       @apply h-10 w-auto object-contain shrink-0;
-      mix-blend-mode: screen;
     }
     .logo { letter-spacing: 0.05em; }
 

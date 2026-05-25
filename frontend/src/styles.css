@@ -159,6 +159,7 @@ router-outlet + * {
   opacity: 0;
   transform: translateY(28px) rotateX(-25deg);
   animation: word-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  margin-right: 0.28em;
 }
 
 /* ---- Texto con gradiente dorado animado ---- */

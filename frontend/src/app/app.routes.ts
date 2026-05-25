@@ -39,13 +39,23 @@ export const routes: Routes = [
     ],
   },
 
+  // ---------------------------------------------------------- /cita es pública
+  // El usuario puede explorar servicios, fechas y barberos sin login.
+  // El check de auth se hace al pulsar "Reservar" (último paso).
+  {
+    path: '',
+    component: AppLayoutComponent,
+    children: [
+      { path: 'cita', loadComponent: () => import('./features/citas/booking.component').then(m => m.BookingComponent) },
+    ],
+  },
+
   // ---------------------------------------------------------- rutas privadas (cliente)
   {
     path: '',
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'cita',         loadComponent: () => import('./features/citas/booking.component').then(m => m.BookingComponent) },
       { path: 'mis-citas',    loadComponent: () => import('./features/citas/mis-citas.component').then(m => m.MisCitasComponent) },
       { path: 'recompensas',  loadComponent: () => import('./features/recompensas.component').then(m => m.RecompensasComponent) },
     ],

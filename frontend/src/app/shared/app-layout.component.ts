@@ -9,7 +9,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
       <header class="border-b border-white/10 bg-app-negro/90 backdrop-blur sticky top-0 z-10">
         <div class="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <a routerLink="/" class="flex items-center gap-2.5" aria-label="Ir al inicio">
-            <img src="/images/logo.jpg" alt="Mike's Club Barber Shop" class="brand-logo-mini" />
+            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop" class="brand-logo-mini" />
             <span class="font-hero text-xl tracking-wider">
               <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
             </span>
@@ -43,7 +43,6 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     }
     .brand-logo-mini {
       @apply h-11 w-auto object-contain shrink-0;
-      mix-blend-mode: screen;
     }
   `],
 })

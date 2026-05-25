@@ -1,10 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AlertaComponent } from '../../shared/alerta.component';
+
+/** Solo aceptamos returnUrls relativos al propio sitio para evitar
+ *  open-redirect vulnerabilities. */
+function safeReturnUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (!url.startsWith('/') || url.startsWith('//')) return null;
+  return url;
+}
 
 @Component({
   selector: 'app-login',
@@ -32,7 +40,7 @@ import { AlertaComponent } from '../../shared/alerta.component';
     </form>
 
     <div class="mt-8 flex flex-col gap-2 text-sm text-center">
-      <a routerLink="/crear-cuenta" class="text-app-azul hover:underline">¿Aún no tienes cuenta? Crear una</a>
+      <a routerLink="/crear-cuenta" [queryParams]="returnUrlParams()" class="text-app-azul hover:underline">¿Aún no tienes cuenta? Crear una</a>
       <a routerLink="/olvide"       class="text-app-azul hover:underline">¿Olvidaste tu password?</a>
     </div>
   `,
@@ -54,22 +62,35 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   email = '';
   password = '';
   loading = signal(false);
   error = signal<string | null>(null);
 
+  /** Propagamos returnUrl al link de "Crear cuenta" para que el flujo
+   *  de registro también devuelva al usuario a su destino original. */
+  returnUrlParams(): Record<string, string> {
+    const r = safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+    return r ? { returnUrl: r } : {};
+  }
+
   async onSubmit() {
     this.loading.set(true);
     this.error.set(null);
     try {
       await this.auth.signIn(this.email, this.password);
-      try {
-        const me = await firstValueFrom(this.api.getMe());
-        this.router.navigateByUrl(me.is_admin ? '/admin' : '/cita');
-      } catch {
-        this.router.navigateByUrl('/cita');
+      const returnUrl = safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+      if (returnUrl) {
+        this.router.navigateByUrl(returnUrl);
+      } else {
+        try {
+          const me = await firstValueFrom(this.api.getMe());
+          this.router.navigateByUrl(me.is_admin ? '/admin' : '/cita');
+        } catch {
+          this.router.navigateByUrl('/cita');
+        }
       }
     } catch (e: any) {
       this.error.set(e?.message ?? 'Error al iniciar sesión');

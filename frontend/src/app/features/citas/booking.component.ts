@@ -1,12 +1,25 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Servicio } from '../../core/models/servicio';
 import { Staff } from '../../core/models/staff';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { BarraNavComponent } from '../../shared/barra-nav.component';
+
+const BOOKING_STATE_KEY = 'appsalon.bookingState.v1';
+
+interface BookingState {
+  paso: number;
+  pasoMax: number;
+  seleccionados: string[];
+  staffId: string | null | undefined;
+  fecha: string;
+  hora: string;
+  notas: string;
+}
 
 const SLOT_MIN_INICIO = '10:00';
 const SLOT_MIN_FIN = '17:30';
@@ -14,11 +27,23 @@ const SLOT_INTERVALO_MIN = 30;
 
 @Component({
   selector: 'app-booking',
-  imports: [FormsModule, CurrencyPipe, BarraNavComponent],
+  imports: [FormsModule, RouterLink, CurrencyPipe, BarraNavComponent],
   template: `
     <h1 class="text-4xl font-black text-app-blanco mb-1">Reservar Cita</h1>
     <p class="text-app-blanco/60 mb-4">Tu próxima visita en 4 pasos</p>
-    <app-barra-nav />
+    @if (isAuthed()) {
+      <app-barra-nav />
+    } @else {
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/15 pb-4 mb-6">
+        <p class="text-sm text-app-blanco/70">
+          Estás explorando como invitado. Te pediremos la cuenta al confirmar.
+        </p>
+        <a routerLink="/login" [queryParams]="{ returnUrl: '/cita' }"
+           class="px-4 py-2 text-sm rounded bg-app-oro text-app-negro font-bold uppercase tracking-wide hover:bg-app-oro-hover">
+          Iniciar sesión
+        </a>
+      </div>
+    }
 
     <!-- Stepper -->
     <nav class="stepper">
@@ -419,7 +444,10 @@ const SLOT_INTERVALO_MIN = 30;
 })
 export class BookingComponent {
   private api = inject(ApiService);
+  private auth = inject(AuthService);
   private router = inject(Router);
+
+  readonly isAuthed = this.auth.isAuthenticated;
 
   paso = signal(1);
   pasoMax = signal(1);
@@ -497,6 +525,41 @@ export class BookingComponent {
       },
       error: () => this.cargandoStaff.set(false),
     });
+
+    // Si el usuario eligió todo, se fue a /login y volvió autenticado, restauramos.
+    if (this.isAuthed()) this.restoreState();
+  }
+
+  private saveState() {
+    const state: BookingState = {
+      paso: this.paso(),
+      pasoMax: this.pasoMax(),
+      seleccionados: Array.from(this.seleccionados()),
+      staffId: this.staffId(),
+      fecha: this.fecha(),
+      hora: this.hora(),
+      notas: this.notas,
+    };
+    try {
+      sessionStorage.setItem(BOOKING_STATE_KEY, JSON.stringify(state));
+    } catch { /* sessionStorage no disponible: silenciar */ }
+  }
+
+  private restoreState() {
+    try {
+      const raw = sessionStorage.getItem(BOOKING_STATE_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw) as BookingState;
+      this.paso.set(s.paso ?? 1);
+      this.pasoMax.set(s.pasoMax ?? 1);
+      this.seleccionados.set(new Set(s.seleccionados ?? []));
+      this.staffId.set(s.staffId);
+      this.fecha.set(s.fecha ?? '');
+      this.hora.set(s.hora ?? '');
+      this.notas = s.notas ?? '';
+      sessionStorage.removeItem(BOOKING_STATE_KEY);
+      if (this.fecha()) this.cargarDisponibilidad();
+    } catch { /* JSON inválido: ignorar */ }
   }
 
   stepClass(n: number): string {
@@ -551,6 +614,13 @@ export class BookingComponent {
 
   reservar() {
     if (!this.puedeReservar()) return;
+    // Auth requerida sólo en este paso final. Guardamos lo elegido en
+    // sessionStorage para restaurarlo automáticamente al volver del login.
+    if (!this.isAuthed()) {
+      this.saveState();
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cita' } });
+      return;
+    }
     this.guardando.set(true);
     this.api.createCita({
       fecha: this.fecha(),

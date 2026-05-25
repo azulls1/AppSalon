@@ -14,7 +14,7 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
       <header class="border-b border-white/10 bg-app-negro/90 backdrop-blur sticky top-0 z-20">
         <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <a routerLink="/" class="flex items-center gap-3">
-            <img src="/images/logo.jpg" alt="Mike's Club Barber Shop" class="brand-logo" />
+            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop" class="brand-logo" />
             <span class="font-hero text-2xl tracking-wider">
               <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
             </span>
@@ -123,7 +123,6 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
     }
     .brand-logo {
       @apply h-14 w-auto object-contain shrink-0;
-      mix-blend-mode: screen;
     }
     .card-body { @apply p-5; }
     .card-footer {
