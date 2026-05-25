@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Servicio } from '../../core/models/servicio';
 import { Staff } from '../../core/models/staff';
+import { PromoCliente } from '../../core/models/promo';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -352,6 +353,39 @@ const SLOT_INTERVALO_MIN = 30;
             <p class="text-[10px] text-app-blanco/50 text-right">{{ notas.length }} / 280</p>
           </div>
 
+          @if (isAuthed() && promos().length > 0) {
+            <div class="resumen-bloque">
+              <div class="flex items-baseline justify-between gap-2 mb-3">
+                <h3 class="resumen-h3">Promoción</h3>
+                <a routerLink="/promociones" class="link-edit">Ver todas</a>
+              </div>
+              <div class="space-y-2">
+                @for (p of promos(); track p.id) {
+                  <button type="button" (click)="togglePromo(p)"
+                          [class.promo-row-sel]="promoSeleccionada()?.id === p.id"
+                          class="promo-row">
+                    <div class="flex-1 min-w-0">
+                      <p class="font-bold text-app-blanco truncate">{{ p.titulo }}</p>
+                      <p class="text-xs text-app-blanco/60 mt-0.5">{{ formatoValorPromo(p) }}</p>
+                    </div>
+                    <span class="promo-radio">
+                      @if (promoSeleccionada()?.id === p.id) {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                          <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      }
+                    </span>
+                  </button>
+                }
+              </div>
+              @if (promoSeleccionada()) {
+                <p class="text-xs text-app-oro mt-3 font-bold">
+                  ✓ Ahorras {{ descuento() | currency:'MXN' }} en esta cita
+                </p>
+              }
+            </div>
+          }
+
           @if (!isAuthed()) {
             <div class="resumen-bloque">
               <div class="flex items-baseline justify-between gap-2 mb-2">
@@ -380,8 +414,16 @@ const SLOT_INTERVALO_MIN = 30;
           }
 
           <div class="resumen-total">
-            <span class="text-sm uppercase tracking-wide font-bold text-app-blanco/70">Total</span>
-            <span class="text-3xl font-black text-app-oro">{{ total() | currency:'MXN' }}</span>
+            <div>
+              <span class="text-sm uppercase tracking-wide font-bold text-app-blanco/70">Total</span>
+              @if (descuento() > 0) {
+                <p class="text-xs text-app-blanco/40 mt-0.5">
+                  <span class="line-through">{{ total() | currency:'MXN' }}</span>
+                  · ahorras {{ descuento() | currency:'MXN' }}
+                </p>
+              }
+            </div>
+            <span class="text-3xl font-black text-app-oro">{{ totalFinal() | currency:'MXN' }}</span>
           </div>
 
           <div class="politica">
@@ -407,7 +449,10 @@ const SLOT_INTERVALO_MIN = 30;
     <footer class="mt-8 pt-6 border-t border-white/10 flex flex-col-reverse sm:flex-row gap-3 sm:items-center sm:justify-between">
       <div class="text-app-blanco/60 text-sm">
         @if (seleccionados().size > 0) {
-          <span class="font-bold text-app-blanco">{{ total() | currency:'MXN' }}</span>
+          <span class="font-bold text-app-blanco">{{ totalFinal() | currency:'MXN' }}</span>
+          @if (descuento() > 0) {
+            <span class="text-app-oro text-xs ml-1">(-{{ descuento() | currency:'MXN' }})</span>
+          }
           · {{ seleccionados().size }} servicio{{ seleccionados().size === 1 ? '' : 's' }}
           @if (duracionTotal() > 0) { · ~{{ duracionTotal() }}m }
         }
@@ -571,6 +616,24 @@ const SLOT_INTERVALO_MIN = 30;
       @apply rounded-md bg-white/5 border border-white/10 h-12 animate-pulse;
     }
 
+    /* Promo selector (paso 4) */
+    .promo-row {
+      @apply w-full flex items-center gap-3 px-3 py-3 rounded-md
+             bg-white/5 border border-white/15 text-left transition-all
+             hover:border-app-oro/60 hover:bg-white/[0.08];
+    }
+    .promo-row-sel {
+      @apply bg-app-oro/15 border-app-oro/60 ring-1 ring-app-oro/40;
+    }
+    .promo-radio {
+      @apply w-6 h-6 rounded-full border-2 border-white/30 flex items-center
+             justify-center shrink-0 transition-colors;
+    }
+    .promo-row-sel .promo-radio {
+      @apply bg-app-oro border-app-oro text-app-negro;
+    }
+    .promo-radio svg { @apply w-3.5 h-3.5; }
+
     /* Wrapper que mantiene el layout fijo entre cargas de disponibilidad.
        Mientras carga, atenuamos sin desmontar — evita el "jump" visual. */
     .slots-wrap {
@@ -642,6 +705,10 @@ export class BookingComponent {
   guestTelefono = '';
   guardando = signal(false);
 
+  // Promos elegibles del cliente autenticado
+  promos = signal<PromoCliente[]>([]);
+  promoSeleccionada = signal<PromoCliente | null>(null);
+
   readonly pasos = [
     { n: 1, label: 'Servicios' },
     { n: 2, label: 'Barbero'   },
@@ -665,6 +732,22 @@ export class BookingComponent {
   total = computed(() =>
     this.serviciosSeleccionados().reduce((acc, s) => acc + Number(s.precio), 0)
   );
+
+  /** Descuento en MXN aplicado por la promo seleccionada. 0 si ninguna. */
+  descuento = computed(() => {
+    const p = this.promoSeleccionada();
+    if (!p) return 0;
+    const subtotal = this.total();
+    const valor = Number(p.valor) || 0;
+    switch (p.tipo) {
+      case 'descuento_pct':   return +(subtotal * (valor / 100)).toFixed(2);
+      case 'descuento_fijo':  return Math.min(valor, subtotal);
+      case 'servicio_gratis': // cubre el servicio más barato seleccionado
+        return Math.min(...this.serviciosSeleccionados().map(s => Number(s.precio)), subtotal);
+      default: return 0;
+    }
+  });
+  totalFinal = computed(() => Math.max(0, this.total() - this.descuento()));
   duracionTotal = computed(() =>
     this.serviciosSeleccionados().reduce((acc, s) => acc + (s.duracion_min || 0), 0)
   );
@@ -693,7 +776,32 @@ export class BookingComponent {
     this.cargarStaff();
 
     // Si el usuario eligió todo, se fue a /login y volvió autenticado, restauramos.
-    if (this.isAuthed()) this.restoreState();
+    if (this.isAuthed()) {
+      this.restoreState();
+      this.cargarPromos();
+    }
+  }
+
+  private cargarPromos() {
+    this.api.listPromos().subscribe({
+      next: r => this.promos.set(r.filter(p => p.elegible)),
+      error: () => this.promos.set([]),
+    });
+  }
+
+  togglePromo(p: PromoCliente) {
+    this.promoSeleccionada.set(this.promoSeleccionada()?.id === p.id ? null : p);
+  }
+
+  formatoValorPromo(p: PromoCliente): string {
+    const v = Number(p.valor) || 0;
+    switch (p.tipo) {
+      case 'descuento_pct':   return `${v}% de descuento`;
+      case 'descuento_fijo':  return `$${v} MXN de descuento`;
+      case 'servicio_gratis': return 'Servicio gratis incluido';
+      case 'producto_gratis': return 'Producto gratis incluido';
+      default: return '';
+    }
   }
 
   private async cargarServicios() {
@@ -864,6 +972,7 @@ export class BookingComponent {
         guest_email: this.guestEmail.trim(),
         guest_telefono: this.guestTelefono.trim(),
       }),
+      ...(this.promoSeleccionada() ? { promo_id: this.promoSeleccionada()!.id } : {}),
     } as any).subscribe({
       next: () => {
         const esGuest = !this.isAuthed();

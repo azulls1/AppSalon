@@ -123,6 +123,35 @@ def crear_cita(
         if total_staff and len([c for c in existente_q if c.get("staff_id")]) >= len(total_staff):
             raise HTTPException(status_code=409, detail="Todos los estilistas están reservados ese horario")
 
+    # Validar promo ANTES de crear la cita: si no es elegible cancelamos
+    # todo para no dejar la cita huérfana.
+    promo = None
+    if user and payload.promo_id:
+        promo_resp = (
+            admin_db.table("appsalon_promos")
+            .select("*")
+            .eq("id", payload.promo_id)
+            .single()
+            .execute()
+        )
+        promo = promo_resp.data
+        if not promo or not promo.get("activa"):
+            raise HTTPException(status_code=400, detail="Promoción no disponible")
+        today_iso = payload.fecha.isoformat()
+        if promo.get("vigencia_inicio") and promo["vigencia_inicio"] > today_iso:
+            raise HTTPException(status_code=400, detail="Promoción aún no vigente")
+        if promo.get("vigencia_fin") and promo["vigencia_fin"] < today_iso:
+            raise HTTPException(status_code=400, detail="Promoción ya expiró")
+        canjes_resp = (
+            admin_db.table("appsalon_promo_canjes")
+            .select("id", count="exact")
+            .eq("promo_id", payload.promo_id)
+            .eq("usuario_id", user.id)
+            .execute()
+        )
+        if (canjes_resp.count or 0) >= promo["max_canjes_por_usuario"]:
+            raise HTTPException(status_code=409, detail="Ya usaste esta promo el máximo de veces")
+
     cita_rows = pg.execute_sql(
         "insert into public.appsalon_citas "
         "(usuario_id, fecha, hora, staff_id, notas, "
@@ -139,6 +168,15 @@ def crear_cita(
     if not cita_rows:
         raise HTTPException(status_code=400, detail="No se pudo crear la cita")
     cita = cita_rows[0]
+
+    # Registrar el canje de la promo ligado a esta cita
+    if promo and user:
+        pg.execute_sql(
+            "insert into public.appsalon_promo_canjes (promo_id, usuario_id, cita_id) values ("
+            f"{pg.quote_literal(promo['id'])}, "
+            f"{pg.quote_literal(user.id)}, "
+            f"{pg.quote_literal(cita['id'])})"
+        )
 
     if servicios:
         values_sql = ", ".join(

@@ -19,6 +19,9 @@ class CitaCreate(BaseModel):
     guest_nombre:   str | None = Field(default=None, max_length=120)
     guest_email:    str | None = Field(default=None, max_length=180)
     guest_telefono: str | None = Field(default=None, max_length=30)
+    # Promo opcional. Sólo se aplica si hay user autenticado y la promo es
+    # elegible (vigente, no excede max_canjes_por_usuario). Si no, se ignora.
+    promo_id:       str | None = None
 
     @field_validator("fecha")
     @classmethod

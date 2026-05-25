@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Cita } from '../../core/models/cita';
+import { PromoCliente } from '../../core/models/promo';
 import { ApiService } from '../../core/services/api.service';
 import { BarraNavComponent } from '../../shared/barra-nav.component';
 
@@ -15,6 +16,23 @@ type Filtro = 'proximas' | 'pasadas' | 'canceladas' | 'todas';
     <h1 class="text-4xl font-black text-app-blanco mb-1">Mis Citas</h1>
     <p class="text-app-blanco/60 mb-4">Historial completo de tus reservas</p>
     <app-barra-nav />
+
+    @if (promoDestacada(); as p) {
+      <a routerLink="/cita" class="promo-banner">
+        <div class="promo-banner-icon">★</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-app-oro">Promoción para ti</p>
+          <p class="font-hero text-2xl text-app-blanco uppercase mt-0.5 truncate">{{ p.titulo }}</p>
+          @if (p.descripcion) {
+            <p class="text-sm text-app-blanco/70 mt-1 line-clamp-1">{{ p.descripcion }}</p>
+          }
+        </div>
+        <div class="promo-banner-cta">
+          <p class="text-app-oro font-black text-xl leading-none">{{ formatoValorPromo(p) }}</p>
+          <p class="text-[10px] uppercase tracking-wide text-app-blanco/60 mt-1">Aplicar →</p>
+        </div>
+      </a>
+    }
 
     <!-- Filter pills + contador -->
     <div class="flex flex-wrap items-center gap-2 mb-5">
@@ -162,6 +180,18 @@ type Filtro = 'proximas' | 'pasadas' | 'canceladas' | 'todas';
       @apply h-11 px-6 rounded-md bg-app-azul hover:bg-app-azul-hover text-app-blanco
              font-bold uppercase tracking-wide transition-colors;
     }
+
+    .promo-banner {
+      @apply flex items-center gap-4 p-4 sm:p-5 mb-6
+             rounded-lg border border-app-oro/40
+             bg-gradient-to-r from-app-oro/15 via-app-oro/5 to-transparent
+             transition-all hover:border-app-oro/70 hover:from-app-oro/25;
+    }
+    .promo-banner-icon {
+      @apply w-12 h-12 rounded-full bg-app-oro text-app-negro
+             flex items-center justify-center text-2xl font-black shrink-0;
+    }
+    .promo-banner-cta { @apply text-right shrink-0; }
   `],
 })
 export class MisCitasComponent {
@@ -170,6 +200,11 @@ export class MisCitasComponent {
   citas = signal<Cita[]>([]);
   cargando = signal(true);
   filtro = signal<Filtro>('proximas');
+
+  promos = signal<PromoCliente[]>([]);
+  promoDestacada = computed<PromoCliente | null>(() => {
+    return this.promos().find(p => p.destacada && p.elegible) ?? null;
+  });
 
   readonly filtros: { value: Filtro; label: string }[] = [
     { value: 'proximas',   label: 'Próximas'  },
@@ -195,7 +230,24 @@ export class MisCitasComponent {
     return false;
   }
 
-  constructor() { this.recargar(); }
+  constructor() {
+    this.recargar();
+    this.api.listPromos().subscribe({
+      next: r => this.promos.set(r),
+      error: () => this.promos.set([]),
+    });
+  }
+
+  formatoValorPromo(p: PromoCliente): string {
+    const v = Number(p.valor) || 0;
+    switch (p.tipo) {
+      case 'descuento_pct':   return `${v}% OFF`;
+      case 'descuento_fijo':  return `$${v} OFF`;
+      case 'servicio_gratis': return '¡GRATIS!';
+      case 'producto_gratis': return '¡GRATIS!';
+      default: return '';
+    }
+  }
 
   recargar() {
     this.cargando.set(true);
