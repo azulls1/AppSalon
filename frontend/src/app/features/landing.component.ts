@@ -96,7 +96,11 @@ import { HeaderPublicoComponent } from '../shared/header-publico.component';
           <p class="text-app-blanco/70 text-center mt-3 mb-12" appReveal="up" [revealDelay]="160">Precios honestos. Ritual incluido.</p>
 
           @if (cargando()) {
-            <p class="text-center text-app-blanco/50">Cargando...</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <div class="srv-skel"></div>
+              }
+            </div>
           } @else if (servicios().length === 0) {
             <p class="text-center text-app-blanco/50">No hay servicios disponibles.</p>
           } @else {
@@ -248,6 +252,9 @@ import { HeaderPublicoComponent } from '../shared/header-publico.component';
       @apply relative rounded-lg bg-app-negro border border-white/15 p-5
              hover:border-app-oro/60 hover:bg-white/[0.06] transition-all;
     }
+    .srv-skel {
+      @apply rounded-lg bg-white/5 border border-white/10 h-28 animate-pulse;
+    }
     .srv-signature {
       @apply border-app-oro/60 bg-gradient-to-br from-app-oro/10 to-transparent;
     }
@@ -354,32 +361,49 @@ export class LandingComponent implements AfterViewInit {
   }
 
   private async cargarServicios() {
-    const { data } = await this.supa.client
-      .from('appsalon_servicios')
-      .select('*')
-      .eq('activo', true)
-      .order('precio', { ascending: false });
-    this.servicios.set((data as Servicio[]) || []);
-    this.cargando.set(false);
+    try {
+      const { data, error } = await this.supa.client
+        .from('appsalon_servicios')
+        .select('*')
+        .eq('activo', true)
+        .order('precio', { ascending: false });
+      if (error) throw error;
+      this.servicios.set((data as Servicio[]) || []);
+    } catch (e) {
+      console.warn('No se pudieron cargar servicios:', e);
+      this.servicios.set([]);
+    } finally {
+      this.cargando.set(false);
+    }
   }
 
   private async cargarEquipo() {
-    const { data } = await this.supa.client
-      .from('appsalon_staff')
-      .select('*')
-      .eq('activo', true)
-      .order('nombre')
-      .limit(4);
-    this.equipoDestacado.set((data as Staff[]) || []);
+    try {
+      const { data, error } = await this.supa.client
+        .from('appsalon_staff')
+        .select('*')
+        .eq('activo', true)
+        .order('nombre')
+        .limit(4);
+      if (error) throw error;
+      this.equipoDestacado.set((data as Staff[]) || []);
+    } catch (e) {
+      console.warn('No se pudo cargar el equipo:', e);
+    }
   }
 
   private async cargarGaleria() {
-    const { data } = await this.supa.client
-      .from('appsalon_galeria')
-      .select('*')
-      .eq('activa', true)
-      .order('created_at', { ascending: false })
-      .limit(3);
-    this.galeria.set((data as Galeria[]) || []);
+    try {
+      const { data, error } = await this.supa.client
+        .from('appsalon_galeria')
+        .select('*')
+        .eq('activa', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (error) throw error;
+      this.galeria.set((data as Galeria[]) || []);
+    } catch (e) {
+      console.warn('No se pudo cargar la galería:', e);
+    }
   }
 }
