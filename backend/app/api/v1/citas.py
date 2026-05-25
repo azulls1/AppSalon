@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Path, status
 
-from app.api.deps import AdminDB, CurrentUser, UserDB
+from app.api.deps import AdminDB, CurrentUser, OptionalUser, UserDB
 from app.core import pg
 from app.schemas.cita import CitaCreate, CitaOut, CitaServicioOut, DisponibilidadOut
 from app.tasks import (
@@ -47,11 +47,12 @@ def listar_mis_citas(user: CurrentUser, db: UserDB, admin_db: AdminDB):
 
 @router.get("/disponibilidad/{fecha}", response_model=DisponibilidadOut)
 def disponibilidad(
-    _user: CurrentUser,
     admin_db: AdminDB,
     fecha: date_type = Path(..., description="YYYY-MM-DD"),
+    _user: OptionalUser = None,
 ):
-    """Devuelve las horas ya tomadas (no canceladas) en esa fecha."""
+    """Devuelve las horas ya tomadas (no canceladas) en esa fecha.
+    Endpoint público — el booking de invitados también consulta aquí."""
     rows = (
         admin_db.table("appsalon_citas")
         .select("hora")
@@ -66,7 +67,24 @@ def disponibilidad(
 
 
 @router.post("", response_model=CitaOut, status_code=status.HTTP_201_CREATED)
-def crear_cita(payload: CitaCreate, user: CurrentUser, db: UserDB, admin_db: AdminDB):
+def crear_cita(
+    payload: CitaCreate,
+    admin_db: AdminDB,
+    user: OptionalUser = None,
+):
+    """Crea una cita. Si viene token Bearer válido, queda ligada al
+    usuario_id del JWT. Si no, requiere guest_nombre/email/telefono y
+    queda como cita de invitado (sin user, sin acumulación de puntos)."""
+    # Validar guest si no hay user autenticado
+    if user is None:
+        missing = [k for k in ("guest_nombre", "guest_email", "guest_telefono")
+                   if not getattr(payload, k, None)]
+        if missing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Para reservar sin cuenta se requiere: {', '.join(missing)}",
+            )
+
     servicios_resp = (
         admin_db.table("appsalon_servicios")
         .select("id, nombre, precio, duracion_min")
@@ -106,12 +124,17 @@ def crear_cita(payload: CitaCreate, user: CurrentUser, db: UserDB, admin_db: Adm
             raise HTTPException(status_code=409, detail="Todos los estilistas están reservados ese horario")
 
     cita_rows = pg.execute_sql(
-        "insert into public.appsalon_citas (usuario_id, fecha, hora, staff_id, notas) values ("
-        f"{pg.quote_literal(user.id)}, "
+        "insert into public.appsalon_citas "
+        "(usuario_id, fecha, hora, staff_id, notas, "
+        " guest_nombre, guest_email, guest_telefono) values ("
+        f"{pg.quote_literal(user.id if user else None)}, "
         f"{pg.quote_literal(payload.fecha.isoformat())}, "
         f"{pg.quote_literal(payload.hora.isoformat())}, "
         f"{pg.quote_literal(payload.staff_id)}, "
-        f"{pg.quote_literal(payload.notas)}) returning *"
+        f"{pg.quote_literal(payload.notas)}, "
+        f"{pg.quote_literal(None if user else payload.guest_nombre)}, "
+        f"{pg.quote_literal(None if user else payload.guest_email)}, "
+        f"{pg.quote_literal(None if user else payload.guest_telefono)}) returning *"
     )
     if not cita_rows:
         raise HTTPException(status_code=400, detail="No se pudo crear la cita")
@@ -129,20 +152,27 @@ def crear_cita(payload: CitaCreate, user: CurrentUser, db: UserDB, admin_db: Adm
             f"(cita_id, servicio_id, precio_snapshot) values {values_sql}"
         )
 
-    profile_resp = (
-        admin_db.table("appsalon_profiles")
-        .select("nombre, apellido, telefono")
-        .eq("id", user.id)
-        .single()
-        .execute()
-    )
-    prof = profile_resp.data or {}
-    nombre = prof.get("nombre", "")
-    telefono = prof.get("telefono") or ""
+    # Datos de contacto para notificaciones (perfil o guest según el caso)
+    if user:
+        profile_resp = (
+            admin_db.table("appsalon_profiles")
+            .select("nombre, apellido, telefono")
+            .eq("id", user.id)
+            .single()
+            .execute()
+        )
+        prof = profile_resp.data or {}
+        nombre = prof.get("nombre", "")
+        telefono = prof.get("telefono") or ""
+        email = user.email
+    else:
+        nombre = payload.guest_nombre or ""
+        telefono = payload.guest_telefono or ""
+        email = payload.guest_email
 
-    if user.email:
+    if email:
         enqueue_notificar_cita(
-            email=user.email,
+            email=email,
             nombre=nombre,
             fecha=payload.fecha.isoformat(),
             hora=payload.hora.isoformat(),

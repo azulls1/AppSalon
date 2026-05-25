@@ -19,7 +19,24 @@ def get_current_user(
     return verify_supabase_jwt(token)
 
 
+def get_optional_user(
+    authorization: Annotated[str | None, Header()] = None,
+) -> AuthUser | None:
+    """Igual que get_current_user pero devuelve None si no hay token.
+    Útil en endpoints públicos que ajustan comportamiento si está logueado
+    (ej. POST /citas: guest si no auth, cliente registrado si sí)."""
+    if not authorization or not authorization.lower().startswith("bearer "):
+        return None
+    token = authorization.split(" ", 1)[1].strip()
+    try:
+        return verify_supabase_jwt(token)
+    except HTTPException:
+        # Token inválido o caducado en un endpoint público: lo tratamos como guest.
+        return None
+
+
 CurrentUser = Annotated[AuthUser, Depends(get_current_user)]
+OptionalUser = Annotated[AuthUser | None, Depends(get_optional_user)]
 
 
 def get_user_db(user: CurrentUser) -> Client:

@@ -14,6 +14,11 @@ class CitaCreate(BaseModel):
     servicio_ids: list[str] = Field(min_length=1)
     staff_id: str | None = None
     notas: str | None = Field(default=None, max_length=280)
+    # Si el caller NO viene autenticado, estos 3 son obligatorios (validado
+    # en el endpoint con OptionalUser). Si sí está autenticado, se ignoran.
+    guest_nombre:   str | None = Field(default=None, max_length=120)
+    guest_email:    str | None = Field(default=None, max_length=180)
+    guest_telefono: str | None = Field(default=None, max_length=30)
 
     @field_validator("fecha")
     @classmethod
@@ -38,7 +43,7 @@ class CitaServicioOut(BaseModel):
 
 class CitaOut(BaseModel):
     id: str
-    usuario_id: str
+    usuario_id: str | None = None
     fecha: date
     hora: time
     estado: CitaEstado
