@@ -98,8 +98,8 @@ import { Galeria } from '../core/models/galeria';
     .nav-link-active { @apply text-app-blanco; }
 
     .brand-logo {
-      @apply w-11 h-11 rounded-md object-contain
-             ring-1 ring-app-oro/40 bg-app-negro shrink-0;
+      @apply h-14 w-auto object-contain shrink-0;
+      mix-blend-mode: screen;
     }
 
     .card {

@@ -74,12 +74,12 @@ import { Galeria } from '../core/models/galeria';
         <div class="max-w-4xl mx-auto px-6 py-16 text-center">
           <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-4">Nuestro Oficio</p>
           <p class="font-serif text-2xl lg:text-3xl text-app-blanco leading-relaxed">
-            "Cada corte es un ritual. Cada navaja, una declaración. Aquí no servimos
-            modas — servimos el estilo del caballero que llega y el del que se va."
+            "La imagen que proyectas habla antes que tú. Un buen corte no solo cambia
+            cómo te ves — también cambia cómo te sientes."
           </p>
           <div class="mt-6 inline-flex items-center gap-3 text-app-blanco/40 text-sm">
             <span class="block h-px w-12 bg-app-oro/40"></span>
-            <span class="font-serif italic">— La Casa</span>
+            <span class="font-serif italic">— Mike's Club</span>
             <span class="block h-px w-12 bg-app-oro/40"></span>
           </div>
         </div>
@@ -182,15 +182,18 @@ import { Galeria } from '../core/models/galeria';
         <div class="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>
             <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-3">La Casa</p>
-            <h2 class="font-hero text-4xl lg:text-5xl text-app-blanco uppercase">Visítanos en Polanco</h2>
+            <h2 class="font-hero text-4xl lg:text-5xl text-app-blanco uppercase">Visítanos en Cuautitlán</h2>
             <p class="text-app-blanco/70 mt-3">
-              Av. Presidente Masaryk 169. Lunes a Viernes de 10:00 a 18:00.
-              Te recibimos con un whisky o un café, según la hora.
+              Cuautitlán Centro, Estado de México. Cortes modernos, ambiente con
+              clima y relajación al cierre de tu servicio.
+            </p>
+            <p class="mt-4 text-app-blanco">
+              <a href="tel:+525633493004" class="text-app-oro hover:underline font-bold">📲 56 3349 3004</a>
             </p>
             <a routerLink="/ubicacion" class="inline-block mt-6 btn-primary">Cómo llegar</a>
           </div>
           <div class="rounded-lg overflow-hidden border border-app-oro/15 h-64">
-            <iframe src="https://www.google.com/maps?q=Polanco+Ciudad+de+M%C3%A9xico&output=embed"
+            <iframe src="https://www.google.com/maps?q=Cuautitl%C3%A1n+Centro%2C+Estado+de+M%C3%A9xico&output=embed"
                     width="100%" height="100%" style="border:0" loading="lazy"></iframe>
           </div>
         </div>
@@ -216,18 +219,65 @@ import { Galeria } from '../core/models/galeria';
       </section>
 
       <!-- Footer -->
-      <footer class="border-t border-app-oro/15 py-10 bg-app-negro-soft">
-        <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <img src="/images/logo.jpg" alt="Mike's Club Barber Shop" class="brand-logo brand-logo-sm" />
-            <span class="logo font-hero text-xl">
-              <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
-            </span>
-            <span class="text-xs text-app-blanco/40 uppercase tracking-wider">Barbería · Est. 2024</span>
+      <footer class="border-t border-app-oro/15 bg-app-negro-soft">
+        <div class="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <img src="/images/logo.jpg" alt="Mike's Club Barber Shop" class="brand-logo brand-logo-sm" />
+              <span class="logo font-hero text-xl">
+                <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
+              </span>
+            </div>
+            <p class="text-app-blanco/60 text-sm leading-relaxed">
+              Mike's Club Barber Shop. Cortes modernos, experiencia premium
+              y la relajación que mereces al final.
+            </p>
           </div>
-          <p class="text-app-blanco/40 text-sm">
+
+          <div>
+            <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-3">Contacto</p>
+            <ul class="space-y-2 text-sm text-app-blanco/70">
+              <li>📍 Cuautitlán Centro, Edo. Méx.</li>
+              <li>
+                <a href="tel:+525633493004" class="hover:text-app-oro font-bold text-app-blanco">📲 56 3349 3004</a>
+              </li>
+              <li>
+                <a href="https://wa.me/525633493004" target="_blank" rel="noopener" class="hover:text-app-oro">WhatsApp</a>
+              </li>
+              <li>🕐 Lun – Sáb · 10:00 – 20:00</li>
+            </ul>
+          </div>
+
+          <div>
+            <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-3">Síguenos</p>
+            <div class="flex flex-col gap-2.5">
+              <a href="https://www.instagram.com/barbershopmikesclub" target="_blank" rel="noopener" class="foot-social">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="20" rx="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="18" cy="6" r="1" fill="currentColor"/>
+                </svg>
+                &#64;barbershopmikesclub
+              </a>
+              <a href="https://www.facebook.com/61585346703843" target="_blank" rel="noopener" class="foot-social">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.51 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.77l-.44 2.89h-2.33v6.99A10 10 0 0 0 22 12z"/>
+                </svg>
+                Facebook
+              </a>
+              <a href="https://vt.tiktok.com/ZSxfY2ULs/" target="_blank" rel="noopener" class="foot-social">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.75a8.16 8.16 0 0 0 4.77 1.52V6.82a4.85 4.85 0 0 1-1.84-.13z"/>
+                </svg>
+                TikTok
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-app-oro/10 py-4">
+          <div class="max-w-6xl mx-auto px-6 text-center text-app-blanco/40 text-xs">
             © 2026 Mike's Club Barber Shop · Todos los derechos reservados
-          </p>
+          </div>
         </div>
       </footer>
     </main>
@@ -242,15 +292,15 @@ import { Galeria } from '../core/models/galeria';
     }
 
     .brand-logo {
-      @apply w-11 h-11 rounded-md object-contain
-             ring-1 ring-app-oro/40 bg-app-negro shrink-0;
+      @apply h-14 w-auto object-contain shrink-0;
+      mix-blend-mode: screen;
     }
-    .brand-logo-sm { @apply w-8 h-8; }
+    .brand-logo-sm { @apply h-10; }
 
     .hero-watermark {
       @apply absolute pointer-events-none select-none
-             right-[-2rem] sm:right-4 top-1/2 -translate-y-1/2
-             w-72 sm:w-96 lg:w-[28rem] opacity-[0.08]
+             right-[-3rem] sm:right-2 lg:right-12 top-1/2 -translate-y-1/2
+             w-80 sm:w-[26rem] lg:w-[32rem] opacity-20
              mix-blend-screen drop-shadow-2xl;
     }
 
@@ -303,6 +353,12 @@ import { Galeria } from '../core/models/galeria';
     }
     .gal-img { @apply w-full h-40 object-cover bg-white/10; }
     .gal-teaser .gal-img:first-child { @apply border-r border-white/10; }
+
+    .foot-social {
+      @apply inline-flex items-center gap-2 text-sm text-app-blanco/70
+             hover:text-app-oro transition-colors;
+    }
+    .foot-social svg { @apply w-4 h-4 shrink-0; }
   `],
 })
 export class LandingComponent {

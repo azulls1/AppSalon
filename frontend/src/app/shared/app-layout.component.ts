@@ -42,8 +42,8 @@ import { RouterLink, RouterOutlet } from '@angular/router';
              border border-app-oro/40 text-app-oro;
     }
     .brand-logo-mini {
-      @apply w-9 h-9 rounded-md object-contain
-             ring-1 ring-app-oro/40 bg-app-negro shrink-0;
+      @apply h-11 w-auto object-contain shrink-0;
+      mix-blend-mode: screen;
     }
   `],
 })
