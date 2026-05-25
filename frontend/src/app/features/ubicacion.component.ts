@@ -12,7 +12,8 @@ import { HeaderPublicoComponent } from '../shared/header-publico.component';
       <app-header-publico active="ubicacion"></app-header-publico>
 
       <section class="max-w-6xl mx-auto px-6 py-16">
-        <h1 class="text-4xl lg:text-5xl font-black text-app-blanco text-center mb-2">Visítanos</h1>
+        <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase text-center mb-3">La Casa</p>
+        <h1 class="font-hero text-5xl lg:text-7xl text-app-blanco text-center uppercase mb-4">Visítanos</h1>
         <p class="text-app-blanco/70 text-center mb-12 max-w-2xl mx-auto">
           Encuéntranos en Cuautitlán Centro. Te esperamos con un café cortesía
           y la silla lista.
@@ -106,7 +107,7 @@ import { HeaderPublicoComponent } from '../shared/header-publico.component';
 
         <!-- ¿Por qué Mike's Club? -->
         <section class="mt-16">
-          <h2 class="text-2xl font-black text-app-blanco mb-6 text-center">Lo que vas a encontrar</h2>
+          <h2 class="font-hero text-3xl lg:text-4xl text-app-blanco uppercase mb-6 text-center">Lo que vas a encontrar</h2>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div class="travel">
               <div class="travel-icon">✂️</div>

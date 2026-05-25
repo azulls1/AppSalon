@@ -14,7 +14,8 @@ import { HeaderPublicoComponent } from '../shared/header-publico.component';
       <app-header-publico active="galeria"></app-header-publico>
 
       <section class="max-w-6xl mx-auto px-6 py-16">
-        <h1 class="text-4xl lg:text-5xl font-black text-app-blanco text-center mb-2">Galería</h1>
+        <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase text-center mb-3">Trabajo Real</p>
+        <h1 class="font-hero text-5xl lg:text-7xl text-app-blanco text-center uppercase mb-4">Antes y Después</h1>
         <p class="text-app-blanco/70 text-center mb-12 max-w-2xl mx-auto">
           Transformaciones reales de nuestros clientes. Deslízate para ver el antes y el después.
         </p>
