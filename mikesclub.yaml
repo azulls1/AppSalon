@@ -1,0 +1,115 @@
+# Stack Swarm para mikesclub.iagentek.com.mx — Mike's Club Barber Shop
+#
+# Topología:
+#   Traefik (iagenteknet) ──> frontend nginx (Angular SPA + proxy)
+#       /api/      ──> backend  (internal) :8000
+#       /supabase/ ──> iagenteksupabase.iagentek.com.mx
+#
+# Sólo el frontend está expuesto. Backend, worker, beat y redis quedan en
+# la red interna del stack.
+#
+# Deploy:
+#   docker stack deploy -c /root/mikesclub.yaml mikesclub
+
+version: "3.8"
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    networks: [internal]
+    volumes:
+      - redis_data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  backend:
+    image: mikesclub-backend:latest
+    environment:
+      APP_ENV: production
+      APP_BASE_URL: https://mikesclub.iagentek.com.mx
+      API_BASE_URL: https://mikesclub.iagentek.com.mx
+      ALLOWED_ORIGINS: https://mikesclub.iagentek.com.mx
+      SUPABASE_URL: https://iagenteksupabase.iagentek.com.mx
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.23LYnOepZ9yTJObLFoTnszO5WdHpbekvgwMt8bn2o_k
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MTUwNTA4MDAsCiAgImV4cCI6IDE4NzI4MTcyMDAKfQ.82nFc9RPC-0tzN0svrqQrnHUHHe51bJkpCUiC_uTypo
+      SUPABASE_JWT_SECRET: a1bbae0445eaf1e0f1e4b297fd602d786b0746d8
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    networks:
+      internal:
+        aliases: [mikesclub-api]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    image: mikesclub-worker:latest
+    command: ["uv", "run", "celery", "-A", "celery_app", "worker", "-l", "info"]
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    networks: [internal]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  beat:
+    image: mikesclub-worker:latest
+    command: ["uv", "run", "celery", "-A", "celery_app", "beat", "-l", "info"]
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    networks: [internal]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  frontend:
+    image: mikesclub-frontend:latest
+    networks: [iagenteknet, internal]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=iagenteknet"
+        - "traefik.http.routers.mikesclub.rule=Host(`mikesclub.iagentek.com.mx`)"
+        - "traefik.http.routers.mikesclub.entrypoints=websecure"
+        - "traefik.http.routers.mikesclub.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.mikesclub.service=mikesclub"
+        - "traefik.http.services.mikesclub.loadbalancer.server.port=80"
+        - "traefik.http.services.mikesclub.loadbalancer.passHostHeader=true"
+
+networks:
+  iagenteknet:
+    external: true
+    attachable: true
+    name: iagenteknet
+  internal:
+    driver: overlay
+
+volumes:
+  redis_data:
