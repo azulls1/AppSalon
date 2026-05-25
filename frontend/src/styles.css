@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---- Paleta barbería ---- */
+  --color-app-negro:        #0e0e0e;  /* fondo principal */
+  --color-app-negro-soft:   #1a1b15;  /* fondo elevado */
+  --color-app-oro:          #c7a24b;  /* dorado barbería — primary */
+  --color-app-oro-hover:    #a8862e;
+  --color-app-crema:        #f4ecdd;  /* crema vintage */
+  --color-app-rojo:         #cb0000;  /* error / destructivo */
+  --color-app-rojo-barber:  #b0322b;  /* rojo barber pole */
+  --color-app-verde:        #329f00;
+  --color-app-blanco:       #ffffff;
+  --color-app-gris:         #e1e1e1;
+
+  /* Aliases retrocompatibles — todo lo que decía azul ahora es oro */
+  --color-app-azul:        #c7a24b;
+  --color-app-azul-hover:  #a8862e;
+
+  --color-brand-50:  #fdf6e6;
+  --color-brand-500: #c7a24b;
+  --color-brand-600: #c7a24b;
+  --color-brand-700: #a8862e;
+
+  /* ---- Tipografías ---- */
+  --font-display: "Poppins", system-ui, sans-serif;            /* body */
+  --font-hero:    "Bebas Neue", "Poppins", sans-serif;         /* display caps */
+  --font-serif:   "Playfair Display", Georgia, serif;          /* acento editorial */
+}
+
+html, body { height: 100%; }
+body {
+  @apply bg-app-negro text-app-blanco antialiased;
+  font-family: var(--font-display);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Clases de tipografía con prefix */
+.font-hero  { font-family: var(--font-hero);  letter-spacing: 0.02em; }
+.font-serif { font-family: var(--font-serif); }

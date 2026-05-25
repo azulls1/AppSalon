@@ -1,0 +1,27 @@
+{
+  "name": "AppSalon Barbería",
+  "short_name": "AppSalon",
+  "description": "Caballeros desde 2024. Corte, barba y afeitado a navaja con tu barbero de confianza.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e0e0e",
+  "theme_color": "#c7a24b",
+  "lang": "es",
+  "categories": ["lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

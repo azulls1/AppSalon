@@ -1,0 +1,35 @@
+# Env
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.uv/
+dist/
+build/
+*.egg-info/
+
+# Node
+node_modules/
+.angular/
+.cache/
+coverage/
+*.log
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Build outputs
+frontend/dist/
+backend/dist/
+
+# Docker volumes
+infra/data/

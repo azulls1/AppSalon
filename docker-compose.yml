@@ -1,0 +1,78 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: appsalon-redis
+    restart: unless-stopped
+    ports: ["6379:6379"]
+    volumes: [redis_data:/data]
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: appsalon-backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports: ["8000:8000"]
+
+  worker:
+    build:
+      context: ./worker
+    container_name: appsalon-worker
+    restart: unless-stopped
+    env_file: ./worker/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["uv", "run", "celery", "-A", "celery_app", "worker", "-l", "info"]
+
+  beat:
+    build:
+      context: ./worker
+    container_name: appsalon-beat
+    restart: unless-stopped
+    env_file: ./worker/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["uv", "run", "celery", "-A", "celery_app", "beat", "-l", "info"]
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: appsalon-frontend
+    restart: unless-stopped
+    ports: ["4200:80"]
+    depends_on: [backend]
+
+  flower:
+    image: mher/flower:latest
+    container_name: appsalon-flower
+    restart: unless-stopped
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=5555
+    ports: ["5555:5555"]
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis_data:
