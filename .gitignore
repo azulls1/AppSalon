@@ -33,3 +33,6 @@ backend/dist/
 
 # Docker volumes
 infra/data/
+
+# Commit message tmp
+.commit-msg.tmp
