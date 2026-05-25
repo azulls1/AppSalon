@@ -35,12 +35,14 @@ import { AuthService } from '../core/services/auth.service';
         <a routerLink="/admin/staff"         routerLinkActive="nav-active" class="nav-btn">Estilistas</a>
         <a routerLink="/admin/galeria"       routerLinkActive="nav-active" class="nav-btn">Galería</a>
         <a routerLink="/admin/recompensas"   routerLinkActive="nav-active" class="nav-btn">Recompensas</a>
+        <a routerLink="/admin/promos"        routerLinkActive="nav-active" class="nav-btn">Promos</a>
       </div>
     } @else {
       <div class="flex flex-wrap gap-2 mb-6">
-        <a routerLink="/cita"        routerLinkActive="nav-active" class="nav-btn">Nueva Cita</a>
-        <a routerLink="/mis-citas"   routerLinkActive="nav-active" class="nav-btn">Mis Citas</a>
-        <a routerLink="/recompensas" routerLinkActive="nav-active" class="nav-btn">Recompensas ★</a>
+        <a routerLink="/cita"         routerLinkActive="nav-active" class="nav-btn">Nueva Cita</a>
+        <a routerLink="/mis-citas"    routerLinkActive="nav-active" class="nav-btn">Mis Citas</a>
+        <a routerLink="/promociones"  routerLinkActive="nav-active" class="nav-btn">Promos</a>
+        <a routerLink="/recompensas"  routerLinkActive="nav-active" class="nav-btn">Recompensas ★</a>
       </div>
     }
   `,

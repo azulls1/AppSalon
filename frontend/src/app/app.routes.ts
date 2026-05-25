@@ -58,6 +58,7 @@ export const routes: Routes = [
     children: [
       { path: 'mis-citas',    loadComponent: () => import('./features/citas/mis-citas.component').then(m => m.MisCitasComponent) },
       { path: 'recompensas',  loadComponent: () => import('./features/recompensas.component').then(m => m.RecompensasComponent) },
+      { path: 'promociones',  loadComponent: () => import('./features/promociones.component').then(m => m.PromocionesComponent) },
     ],
   },
 
@@ -80,6 +81,9 @@ export const routes: Routes = [
       { path: 'admin/recompensas',            loadComponent: () => import('./features/admin/recompensas-list.component').then(m => m.RecompensasListComponent) },
       { path: 'admin/recompensas/crear',      loadComponent: () => import('./features/admin/recompensas-form.component').then(m => m.RecompensasFormComponent) },
       { path: 'admin/recompensas/editar/:id', loadComponent: () => import('./features/admin/recompensas-form.component').then(m => m.RecompensasFormComponent) },
+      { path: 'admin/promos',                 loadComponent: () => import('./features/admin/promos-list.component').then(m => m.PromosListComponent) },
+      { path: 'admin/promos/crear',           loadComponent: () => import('./features/admin/promos-form.component').then(m => m.PromosFormComponent) },
+      { path: 'admin/promos/editar/:id',      loadComponent: () => import('./features/admin/promos-form.component').then(m => m.PromosFormComponent) },
     ],
   },
 

@@ -8,6 +8,7 @@ import { Servicio, ServicioCreate, ServicioUpdate } from '../models/servicio';
 import { Resena, ResenaCreate, Staff } from '../models/staff';
 import { Galeria, GaleriaCreate, GaleriaUpdate } from '../models/galeria';
 import { Canje, CanjearResult, Recompensa, RecompensaCreate, RecompensaUpdate } from '../models/recompensa';
+import { Promo, PromoCliente, PromoCreate, PromoUpdate } from '../models/promo';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -108,6 +109,27 @@ export class ApiService {
   }
   misCanjes(): Observable<Canje[]> {
     return this.http.get<Canje[]>(`${this.base}/recompensas/canjes/mios`);
+  }
+
+  // ---------- promos
+  listPromos(): Observable<PromoCliente[]> {
+    return this.http.get<PromoCliente[]>(`${this.base}/promos`);
+  }
+  listPromosAdmin(): Observable<Promo[]> {
+    return this.http.get<Promo[]>(`${this.base}/promos/admin`);
+  }
+  createPromo(payload: PromoCreate): Observable<Promo> {
+    return this.http.post<Promo>(`${this.base}/promos`, payload);
+  }
+  updatePromo(id: string, payload: PromoUpdate): Observable<Promo> {
+    return this.http.put<Promo>(`${this.base}/promos/${id}`, payload);
+  }
+  deletePromo(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/promos/${id}`);
+  }
+  canjearPromo(id: string): Observable<{ canje_id: string; promo_id: string }> {
+    return this.http.post<{ canje_id: string; promo_id: string }>(
+      `${this.base}/promos/${id}/canjear`, {});
   }
 
   // ---------- uploads
