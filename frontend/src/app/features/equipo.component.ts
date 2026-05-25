@@ -3,10 +3,11 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { SupabaseService } from '../core/services/supabase.service';
 import { Staff } from '../core/models/staff';
+import { FooterPublicoComponent } from '../shared/footer-publico.component';
 
 @Component({
   selector: 'app-equipo',
-  imports: [RouterLink],
+  imports: [RouterLink, FooterPublicoComponent],
   template: `
     <main class="min-h-screen bg-app-negro">
       <!-- Nav igual que landing -->
@@ -89,11 +90,7 @@ import { Staff } from '../core/models/staff';
         }
       </section>
 
-      <footer class="border-t border-app-oro/15 py-8 mt-12">
-        <div class="max-w-6xl mx-auto px-6 text-center text-app-blanco/40 text-sm">
-          © 2026 AppSalon Barbería · Est. 2024
-        </div>
-      </footer>
+      <app-footer-publico></app-footer-publico>
     </main>
   `,
   styles: [`

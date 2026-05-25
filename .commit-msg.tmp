@@ -1,0 +1,13 @@
+Unifica el footer publico en un componente shared
+
+- Nuevo FooterPublicoComponent en shared/ con marca, contacto y redes
+  (IG, FB, TikTok) — reutilizable y consistente
+- Landing, equipo, galeria y ubicacion ahora usan
+  <app-footer-publico /> en vez de footers locales heterogeneos
+- Antes: el landing tenia el footer rico y las otras vistas un footer
+  minimal con texto desactualizado ("Tu salon de belleza de confianza")
+- Limpia estilos .foot-social duplicados del landing
+- Single source of truth: cambiar tel, redes o copyright se hace en un
+  solo archivo
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>

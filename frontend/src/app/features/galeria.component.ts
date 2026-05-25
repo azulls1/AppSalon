@@ -3,10 +3,11 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { SupabaseService } from '../core/services/supabase.service';
 import { Galeria } from '../core/models/galeria';
+import { FooterPublicoComponent } from '../shared/footer-publico.component';
 
 @Component({
   selector: 'app-galeria',
-  imports: [RouterLink],
+  imports: [RouterLink, FooterPublicoComponent],
   template: `
     <main class="min-h-screen bg-app-negro">
       <header class="border-b border-white/10 bg-app-negro/90 backdrop-blur sticky top-0 z-20">
@@ -73,11 +74,7 @@ import { Galeria } from '../core/models/galeria';
         </div>
       </section>
 
-      <footer class="border-t border-white/10 py-8 mt-12">
-        <div class="max-w-6xl mx-auto px-6 text-center text-app-blanco/50 text-sm">
-          © 2026 AppSalon · Tu salón de belleza de confianza
-        </div>
-      </footer>
+      <app-footer-publico></app-footer-publico>
     </main>
   `,
   styles: [`
