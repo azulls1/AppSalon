@@ -40,3 +40,168 @@ body {
 /* Clases de tipografía con prefix */
 .font-hero  { font-family: var(--font-hero);  letter-spacing: 0.02em; }
 .font-serif { font-family: var(--font-serif); }
+
+/* =========================================================
+   Animaciones globales — reveal on scroll, hover lift, glow
+   ========================================================= */
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(199, 162, 75, 0.18))
+            drop-shadow(0 0 28px rgba(199, 162, 75, 0.08));
+  }
+  50% {
+    filter: drop-shadow(0 0 24px rgba(199, 162, 75, 0.45))
+            drop-shadow(0 0 50px rgba(199, 162, 75, 0.2));
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(-50%) rotate(0deg); }
+  50%      { transform: translateY(-52%) rotate(1.5deg); }
+}
+
+@keyframes word-rise {
+  from { opacity: 0; transform: translateY(28px) rotateX(-25deg); }
+  to   { opacity: 1; transform: translateY(0)    rotateX(0); }
+}
+
+@keyframes route-fade-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradient-pan {
+  0%   { background-position:   0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position:   0% 50%; }
+}
+
+/* ---- Reveal on scroll ---- */
+.reveal {
+  opacity: 0;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal-up    { transform: translateY(40px); }
+.reveal-left  { transform: translateX(-40px); }
+.reveal-right { transform: translateX(40px); }
+.reveal-scale { transform: scale(0.94); }
+.reveal-fade  { transform: none; }
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Route transition ---- */
+router-outlet + * {
+  animation: route-fade-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- Botones con shimmer dorado ---- */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  background-position: -200% 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 200ms ease;
+  opacity: 0;
+}
+.btn-primary:hover::after {
+  opacity: 1;
+  animation: shimmer 1100ms ease-in-out;
+}
+
+/* ---- Hover 3D lift para cards ---- */
+.tilt-3d {
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 380ms ease,
+              border-color 380ms ease;
+  transform-style: preserve-3d;
+  perspective: 800px;
+}
+.tilt-3d:hover {
+  transform: translateY(-6px) rotateX(3deg) rotateY(-2deg);
+  box-shadow: 0 24px 60px -30px rgba(199, 162, 75, 0.55),
+              0 0 0 1px rgba(199, 162, 75, 0.35);
+}
+
+/* ---- Watermark con glow lento ---- */
+.glow-pulse {
+  animation: pulse-glow 6s ease-in-out infinite,
+             float-slow 14s ease-in-out infinite;
+}
+
+/* ---- Slogan letra/palabra por palabra ---- */
+.word-stagger > .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(28px) rotateX(-25deg);
+  animation: word-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ---- Texto con gradiente dorado animado ---- */
+.text-gold-shift {
+  background: linear-gradient(110deg, #c7a24b 0%, #f4ecdd 25%, #e8c976 50%, #c7a24b 75%, #a8862e 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  animation: gradient-pan 6s ease-in-out infinite;
+}
+
+/* ---- Nav links con underline animado ---- */
+.nav-link, .nav-link-active {
+  position: relative;
+}
+.nav-link::after, .nav-link-active::after {
+  content: '';
+  position: absolute;
+  left: 12px; right: 12px; bottom: 4px;
+  height: 2px;
+  background: var(--color-app-oro);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:hover::after { transform: scaleX(1); transform-origin: left center; }
+.nav-link-active::after { transform: scaleX(1); }
+
+/* ---- Underline en links de redes y secundarios ---- */
+.hover-grow { transition: transform 280ms ease; }
+.hover-grow:hover { transform: translateY(-2px); }
+
+/* ---- Respeto a prefers-reduced-motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-up, .reveal-left, .reveal-right, .reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .glow-pulse, .text-gold-shift, .word-stagger > .word,
+  router-outlet + * {
+    animation: none !important;
+  }
+  .tilt-3d:hover { transform: none !important; }
+}

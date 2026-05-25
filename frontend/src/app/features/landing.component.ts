@@ -1,15 +1,17 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, PLATFORM_ID, ViewChild, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { SupabaseService } from '../core/services/supabase.service';
 import { Servicio } from '../core/models/servicio';
 import { Staff } from '../core/models/staff';
 import { Galeria } from '../core/models/galeria';
+import { RevealDirective } from '../shared/reveal.directive';
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink, CurrencyPipe, RevealDirective],
   template: `
     <main class="min-h-screen bg-app-negro">
 
@@ -40,25 +42,35 @@ import { Galeria } from '../core/models/galeria';
       </header>
 
       <!-- Hero -->
-      <section class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-cover bg-center opacity-25"
-             style="background-image: url('/salon.jpg');"></div>
+      <section class="relative overflow-hidden" #hero>
+        <div #heroBg class="absolute inset-0 bg-cover bg-center opacity-25 will-change-transform"
+             style="background-image: url('/salon.jpg'); transform: translateY(0);"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-app-negro via-app-negro/70 to-transparent"></div>
         <img src="/images/logo.jpg" alt=""
              aria-hidden="true"
-             class="hero-watermark" />
+             class="hero-watermark glow-pulse" />
         <div class="relative max-w-6xl mx-auto px-6 py-24 lg:py-36">
-          <p class="font-serif text-app-oro/90 italic mb-3 tracking-wide">Establecido en 2024</p>
-          <h1 class="font-hero text-6xl lg:text-8xl text-app-blanco max-w-4xl leading-[0.95] uppercase">
-            Una silla.<br>
-            Una navaja.<br>
-            <span class="text-app-oro">Un ritual.</span>
+          <p class="font-serif text-app-oro/90 italic mb-3 tracking-wide reveal reveal-up is-visible"
+             style="animation: route-fade-in 700ms 100ms cubic-bezier(0.22, 1, 0.36, 1) both;">
+            Establecido en 2024
+          </p>
+          <h1 class="font-hero text-6xl lg:text-8xl text-app-blanco max-w-4xl leading-[0.95] uppercase word-stagger">
+            <span class="word" style="animation-delay: 220ms">Una</span>
+            <span class="word" style="animation-delay: 320ms">silla.</span>
+            <br>
+            <span class="word" style="animation-delay: 460ms">Una</span>
+            <span class="word" style="animation-delay: 560ms">navaja.</span>
+            <br>
+            <span class="word text-gold-shift" style="animation-delay: 720ms">Un</span>
+            <span class="word text-gold-shift" style="animation-delay: 820ms">ritual.</span>
           </h1>
-          <p class="text-lg lg:text-xl text-app-blanco/80 mt-8 max-w-2xl">
+          <p class="text-lg lg:text-xl text-app-blanco/80 mt-8 max-w-2xl"
+             style="animation: route-fade-in 800ms 1050ms cubic-bezier(0.22, 1, 0.36, 1) both; opacity: 0;">
             El oficio del barbero, sin atajos. Corte, barba y afeitado clásico a navaja
             para el caballero que sabe distinguir.
           </p>
-          <div class="flex flex-wrap gap-3 mt-10">
+          <div class="flex flex-wrap gap-3 mt-10"
+               style="animation: route-fade-in 800ms 1250ms cubic-bezier(0.22, 1, 0.36, 1) both; opacity: 0;">
             @if (isLoggedIn()) {
               <a routerLink="/cita" class="btn-primary text-base px-8 py-4">Reservar mi silla</a>
             } @else {
@@ -71,11 +83,11 @@ import { Galeria } from '../core/models/galeria';
 
       <!-- Manifiesto -->
       <section class="border-y border-app-oro/15 bg-app-negro-soft">
-        <div class="max-w-4xl mx-auto px-6 py-16 text-center">
+        <div class="max-w-4xl mx-auto px-6 py-16 text-center" appReveal="scale">
           <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-4">Nuestro Oficio</p>
           <p class="font-serif text-2xl lg:text-3xl text-app-blanco leading-relaxed">
             "La imagen que proyectas habla antes que tú. Un buen corte no solo cambia
-            cómo te ves — también cambia cómo te sientes."
+            cómo te ves — también cambia cómo te <span class="text-gold-shift font-bold">sientes</span>."
           </p>
           <div class="mt-6 inline-flex items-center gap-3 text-app-blanco/40 text-sm">
             <span class="block h-px w-12 bg-app-oro/40"></span>
@@ -88,8 +100,8 @@ import { Galeria } from '../core/models/galeria';
       <!-- ¿Por qué? -->
       <section class="max-w-6xl mx-auto px-6 py-16">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          @for (f of features; track f.titulo) {
-            <div class="feature">
+          @for (f of features; track f.titulo; let i = $index) {
+            <div class="feature tilt-3d" appReveal="up" [revealDelay]="i * 120">
               <div class="feature-icon" [innerHTML]="f.icon"></div>
               <h3 class="font-bold text-app-blanco text-lg mt-4">{{ f.titulo }}</h3>
               <p class="text-app-blanco/60 text-sm mt-1">{{ f.desc }}</p>
@@ -101,9 +113,9 @@ import { Galeria } from '../core/models/galeria';
       <!-- Carta de servicios -->
       <section id="servicios" class="bg-white/[0.03] border-y border-app-oro/15 py-20">
         <div class="max-w-6xl mx-auto px-6">
-          <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase text-center mb-3">La Carta</p>
-          <h2 class="font-hero text-5xl lg:text-6xl text-app-blanco text-center uppercase">Servicios</h2>
-          <p class="text-app-blanco/70 text-center mt-3 mb-12">Precios honestos. Ritual incluido.</p>
+          <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase text-center mb-3" appReveal="up">La Carta</p>
+          <h2 class="font-hero text-5xl lg:text-6xl text-app-blanco text-center uppercase" appReveal="up" [revealDelay]="80">Servicios</h2>
+          <p class="text-app-blanco/70 text-center mt-3 mb-12" appReveal="up" [revealDelay]="160">Precios honestos. Ritual incluido.</p>
 
           @if (cargando()) {
             <p class="text-center text-app-blanco/50">Cargando...</p>
@@ -111,8 +123,9 @@ import { Galeria } from '../core/models/galeria';
             <p class="text-center text-app-blanco/50">No hay servicios disponibles.</p>
           } @else {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              @for (s of servicios(); track s.id) {
-                <div class="srv" [class.srv-signature]="esSignature(s.nombre)">
+              @for (s of servicios(); track s.id; let i = $index) {
+                <div class="srv tilt-3d" [class.srv-signature]="esSignature(s.nombre)"
+                     appReveal="scale" [revealDelay]="(i % 3) * 100">
                   @if (esSignature(s.nombre)) {
                     <span class="signature-badge">Signature</span>
                   }
@@ -130,19 +143,20 @@ import { Galeria } from '../core/models/galeria';
 
       <!-- Equipo -->
       <section class="max-w-6xl mx-auto px-6 py-20">
-        <div class="flex items-end justify-between mb-8">
+        <div class="flex items-end justify-between mb-8" appReveal="left">
           <div>
             <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-3">Detrás de la Silla</p>
             <h2 class="font-hero text-5xl lg:text-6xl text-app-blanco uppercase">Nuestros Barberos</h2>
             <p class="text-app-blanco/70 mt-2">Maestros del oficio con años en las navajas</p>
           </div>
-          <a routerLink="/equipo" class="hidden sm:inline-block text-sm font-bold uppercase tracking-wide text-app-oro hover:underline">
+          <a routerLink="/equipo" class="hidden sm:inline-block text-sm font-bold uppercase tracking-wide text-app-oro hover:underline hover-grow">
             Ver todos →
           </a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          @for (m of equipoDestacado(); track m.id) {
-            <a routerLink="/equipo" class="team-card">
+          @for (m of equipoDestacado(); track m.id; let i = $index) {
+            <a routerLink="/equipo" class="team-card tilt-3d"
+               appReveal="up" [revealDelay]="i * 100">
               <img [src]="m.foto_url" [alt]="m.nombre" class="team-img" />
               <div class="p-3">
                 <p class="font-bold text-app-blanco">{{ m.nombre }} {{ m.apellido }}</p>
@@ -155,18 +169,19 @@ import { Galeria } from '../core/models/galeria';
 
       <!-- Galería teaser -->
       <section class="max-w-6xl mx-auto px-6 py-16">
-        <div class="flex items-end justify-between mb-8">
+        <div class="flex items-end justify-between mb-8" appReveal="right">
           <div>
             <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-3">Trabajo Real</p>
             <h2 class="font-hero text-5xl lg:text-6xl text-app-blanco uppercase">Antes y Después</h2>
           </div>
-          <a routerLink="/galeria" class="hidden sm:inline-block text-sm font-bold uppercase tracking-wide text-app-oro hover:underline">
+          <a routerLink="/galeria" class="hidden sm:inline-block text-sm font-bold uppercase tracking-wide text-app-oro hover:underline hover-grow">
             Ver portafolio →
           </a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (g of galeria(); track g.id) {
-            <a routerLink="/galeria" class="gal-teaser">
+          @for (g of galeria(); track g.id; let i = $index) {
+            <a routerLink="/galeria" class="gal-teaser tilt-3d"
+               appReveal="scale" [revealDelay]="i * 120">
               <div class="grid grid-cols-2">
                 <img [src]="g.foto_antes_url" alt="antes" class="gal-img" />
                 <img [src]="g.foto_despues_url" alt="después" class="gal-img" />
@@ -180,7 +195,7 @@ import { Galeria } from '../core/models/galeria';
       <!-- Ubicación teaser -->
       <section class="bg-white/[0.03] border-y border-app-oro/15">
         <div class="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div>
+          <div appReveal="left">
             <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-3">La Casa</p>
             <h2 class="font-hero text-4xl lg:text-5xl text-app-blanco uppercase">Visítanos en Cuautitlán</h2>
             <p class="text-app-blanco/70 mt-3">
@@ -192,7 +207,7 @@ import { Galeria } from '../core/models/galeria';
             </p>
             <a routerLink="/ubicacion" class="inline-block mt-6 btn-primary">Cómo llegar</a>
           </div>
-          <div class="rounded-lg overflow-hidden border border-app-oro/15 h-64">
+          <div class="rounded-lg overflow-hidden border border-app-oro/15 h-64" appReveal="right" [revealDelay]="120">
             <iframe src="https://www.google.com/maps?q=Cuautitl%C3%A1n+Centro%2C+Estado+de+M%C3%A9xico&output=embed"
                     width="100%" height="100%" style="border:0" loading="lazy"></iframe>
           </div>
@@ -200,10 +215,10 @@ import { Galeria } from '../core/models/galeria';
       </section>
 
       <!-- CTA final -->
-      <section class="max-w-3xl mx-auto px-6 py-24 text-center">
+      <section class="max-w-3xl mx-auto px-6 py-24 text-center" appReveal="scale">
         <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase mb-4">Tu barbero te atenderá ahora</p>
         <h2 class="font-hero text-5xl lg:text-7xl text-app-blanco uppercase leading-[0.95]">
-          La silla está<br><span class="text-app-oro">esperando.</span>
+          La silla está<br><span class="text-gold-shift">esperando.</span>
         </h2>
         <p class="text-app-blanco/70 text-lg mt-6">
           Crea tu cuenta gratis y reserva tu primera cita en menos de un minuto.
@@ -361,9 +376,12 @@ import { Galeria } from '../core/models/galeria';
     .foot-social svg { @apply w-4 h-4 shrink-0; }
   `],
 })
-export class LandingComponent {
+export class LandingComponent implements AfterViewInit {
   private auth = inject(AuthService);
   private supa = inject(SupabaseService);
+  private platformId = inject(PLATFORM_ID);
+
+  @ViewChild('heroBg') heroBg?: ElementRef<HTMLElement>;
 
   servicios = signal<Servicio[]>([]);
   equipoDestacado = signal<Staff[]>([]);
@@ -373,6 +391,28 @@ export class LandingComponent {
   isLoggedIn = computed(() => this.auth.isAuthenticated());
   isAdmin = signal(false);
   dashboardLink = computed(() => (this.isAdmin() ? '/admin' : '/cita'));
+
+  private ticking = false;
+
+  ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.onScroll();
+    }
+  }
+
+  @HostListener('window:scroll')
+  onScroll() {
+    if (!isPlatformBrowser(this.platformId) || !this.heroBg) return;
+    if (this.ticking) return;
+    this.ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      const shift = Math.min(y * 0.35, 280);
+      const el = this.heroBg!.nativeElement;
+      el.style.transform = `translate3d(0, ${shift}px, 0) scale(${1 + y * 0.0003})`;
+      this.ticking = false;
+    });
+  }
 
   readonly features = [
     {
