@@ -9,38 +9,15 @@ import { Staff } from '../core/models/staff';
 import { Galeria } from '../core/models/galeria';
 import { RevealDirective } from '../shared/reveal.directive';
 import { FooterPublicoComponent } from '../shared/footer-publico.component';
+import { HeaderPublicoComponent } from '../shared/header-publico.component';
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CurrencyPipe, RevealDirective, FooterPublicoComponent],
+  imports: [RouterLink, CurrencyPipe, RevealDirective, FooterPublicoComponent, HeaderPublicoComponent],
   template: `
     <main class="min-h-screen bg-app-negro">
 
-      <!-- Header / nav -->
-      <header class="border-b border-app-oro/15 bg-app-negro/95 backdrop-blur sticky top-0 z-20">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a routerLink="/" class="flex items-center gap-3">
-            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop"
-                 class="brand-logo" />
-            <span class="logo font-hero text-2xl">
-              <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
-            </span>
-            <span class="tag">Barbería</span>
-          </a>
-          <nav class="flex items-center gap-1 sm:gap-2">
-            <a routerLink="/"          class="nav-link-active hidden sm:inline-block">Inicio</a>
-            <a routerLink="/equipo"    class="nav-link hidden sm:inline-block">Barberos</a>
-            <a routerLink="/galeria"   class="nav-link hidden sm:inline-block">Galería</a>
-            <a routerLink="/ubicacion" class="nav-link hidden sm:inline-block">La Casa</a>
-            @if (isLoggedIn()) {
-              <a [routerLink]="dashboardLink()" class="btn-primary">{{ isAdmin() ? 'Panel' : 'Mi Cuenta' }}</a>
-            } @else {
-              <a routerLink="/login" class="btn-ghost">Entrar</a>
-              <a routerLink="/crear-cuenta" class="btn-primary">Reservar</a>
-            }
-          </nav>
-        </div>
-      </header>
+      <app-header-publico active="inicio"></app-header-publico>
 
       <!-- Hero -->
       <section class="relative overflow-hidden" #hero>
@@ -240,17 +217,6 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
   styles: [`
     @reference "../../styles.css";
 
-    .logo { letter-spacing: 0.05em; }
-    .tag {
-      @apply text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 rounded
-             border border-app-oro/50 text-app-oro;
-    }
-
-    .brand-logo {
-      @apply h-14 w-auto object-contain shrink-0;
-    }
-    .brand-logo-sm { @apply h-10; }
-
     .hero-watermark {
       @apply absolute pointer-events-none select-none
              right-2 sm:right-6 lg:right-20 top-[65%] -translate-y-1/2
@@ -268,13 +234,6 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
       @apply rounded-md border border-app-oro/40 hover:bg-app-oro/10 text-app-blanco px-5 py-2.5
              text-sm font-bold uppercase tracking-wider transition-colors inline-block;
     }
-
-    .nav-link, .nav-link-active {
-      @apply text-xs font-bold uppercase tracking-[0.15em]
-             hover:text-app-oro transition-colors px-3 py-2;
-    }
-    .nav-link { @apply text-app-blanco/60; }
-    .nav-link-active { @apply text-app-oro; }
 
     .feature {
       @apply rounded-lg bg-white/5 border border-app-oro/15 p-6 text-center;

@@ -4,31 +4,14 @@ import { AuthService } from '../core/services/auth.service';
 import { SupabaseService } from '../core/services/supabase.service';
 import { Galeria } from '../core/models/galeria';
 import { FooterPublicoComponent } from '../shared/footer-publico.component';
+import { HeaderPublicoComponent } from '../shared/header-publico.component';
 
 @Component({
   selector: 'app-galeria',
-  imports: [RouterLink, FooterPublicoComponent],
+  imports: [RouterLink, FooterPublicoComponent, HeaderPublicoComponent],
   template: `
     <main class="min-h-screen bg-app-negro">
-      <header class="border-b border-white/10 bg-app-negro/90 backdrop-blur sticky top-0 z-20">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a routerLink="/" class="flex items-center gap-3">
-            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop" class="brand-logo" />
-            <span class="text-2xl font-black text-app-azul">App</span><span class="text-2xl font-black text-app-blanco">Salon</span>
-          </a>
-          <nav class="flex items-center gap-2">
-            <a routerLink="/"          class="nav-link">Inicio</a>
-            <a routerLink="/equipo"    class="nav-link">Barberos</a>
-            <a routerLink="/galeria"   class="nav-link-active">Galería</a>
-            <a routerLink="/ubicacion" class="nav-link">La Casa</a>
-            @if (isLoggedIn()) {
-              <a routerLink="/cita" class="btn-primary">Reservar</a>
-            } @else {
-              <a routerLink="/login" class="btn-ghost">Iniciar Sesión</a>
-            }
-          </nav>
-        </div>
-      </header>
+      <app-header-publico active="galeria"></app-header-publico>
 
       <section class="max-w-6xl mx-auto px-6 py-16">
         <h1 class="text-4xl lg:text-5xl font-black text-app-blanco text-center mb-2">Galería</h1>
@@ -80,22 +63,8 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
   styles: [`
     @reference "../../styles.css";
     .btn-primary {
-      @apply rounded-md bg-app-azul hover:bg-app-azul-hover text-app-blanco px-5 py-2.5
+      @apply rounded-md bg-app-oro hover:bg-app-oro-hover text-app-negro px-5 py-2.5
              text-sm font-bold uppercase tracking-wide transition-colors inline-block;
-    }
-    .btn-ghost {
-      @apply rounded-md border border-white/25 hover:bg-white/10 text-app-blanco px-5 py-2.5
-             text-sm font-bold uppercase tracking-wide transition-colors;
-    }
-    .nav-link, .nav-link-active {
-      @apply text-sm font-bold uppercase tracking-wide
-             hover:text-app-blanco transition-colors px-3 py-2;
-    }
-    .nav-link { @apply text-app-blanco/60; }
-    .nav-link-active { @apply text-app-blanco; }
-
-    .brand-logo {
-      @apply h-14 w-auto object-contain shrink-0;
     }
 
     .card {

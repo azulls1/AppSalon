@@ -4,35 +4,14 @@ import { AuthService } from '../core/services/auth.service';
 import { SupabaseService } from '../core/services/supabase.service';
 import { Staff } from '../core/models/staff';
 import { FooterPublicoComponent } from '../shared/footer-publico.component';
+import { HeaderPublicoComponent } from '../shared/header-publico.component';
 
 @Component({
   selector: 'app-equipo',
-  imports: [RouterLink, FooterPublicoComponent],
+  imports: [RouterLink, FooterPublicoComponent, HeaderPublicoComponent],
   template: `
     <main class="min-h-screen bg-app-negro">
-      <!-- Nav igual que landing -->
-      <header class="border-b border-white/10 bg-app-negro/90 backdrop-blur sticky top-0 z-20">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a routerLink="/" class="flex items-center gap-3">
-            <img src="/images/logo-transparent.png" alt="Mike's Club Barber Shop" class="brand-logo" />
-            <span class="font-hero text-2xl tracking-wider">
-              <span class="text-app-oro">APP</span><span class="text-app-blanco">SALON</span>
-            </span>
-            <span class="tag">Barbería</span>
-          </a>
-          <nav class="flex items-center gap-2">
-            <a routerLink="/"          class="nav-link">Inicio</a>
-            <a routerLink="/equipo"    class="nav-link-active">Barberos</a>
-            <a routerLink="/galeria"   class="nav-link">Galería</a>
-            <a routerLink="/ubicacion" class="nav-link">La Casa</a>
-            @if (isLoggedIn()) {
-              <a routerLink="/cita" class="btn-primary">Reservar</a>
-            } @else {
-              <a routerLink="/login" class="btn-ghost">Iniciar Sesión</a>
-            }
-          </nav>
-        </div>
-      </header>
+      <app-header-publico active="barberos"></app-header-publico>
 
       <section class="max-w-6xl mx-auto px-6 py-16">
         <p class="text-app-oro text-xs tracking-[0.3em] font-bold uppercase text-center mb-3">Detrás de la Silla</p>
@@ -95,20 +74,6 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
   `,
   styles: [`
     @reference "../../styles.css";
-    .btn-primary {
-      @apply rounded-md bg-app-azul hover:bg-app-azul-hover text-app-blanco px-5 py-2.5
-             text-sm font-bold uppercase tracking-wide transition-colors;
-    }
-    .btn-ghost {
-      @apply rounded-md border border-white/25 hover:bg-white/10 text-app-blanco px-5 py-2.5
-             text-sm font-bold uppercase tracking-wide transition-colors;
-    }
-    .nav-link, .nav-link-active {
-      @apply text-sm font-bold uppercase tracking-wide
-             hover:text-app-blanco transition-colors px-3 py-2;
-    }
-    .nav-link { @apply text-app-blanco/60; }
-    .nav-link-active { @apply text-app-blanco; }
 
     .card {
       @apply rounded-lg bg-white/5 border border-white/15 overflow-hidden
@@ -116,13 +81,6 @@ import { FooterPublicoComponent } from '../shared/footer-publico.component';
     }
     .card-img {
       @apply w-full h-64 object-cover bg-white/10 grayscale hover:grayscale-0 transition-all duration-500;
-    }
-    .tag {
-      @apply text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 rounded
-             border border-app-oro/50 text-app-oro;
-    }
-    .brand-logo {
-      @apply h-14 w-auto object-contain shrink-0;
     }
     .card-body { @apply p-5; }
     .card-footer {
